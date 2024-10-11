@@ -1,7 +1,8 @@
 "use client";
-import { SideMenuForAdmin } from "@/components/ui/DashboardSideMenu/DashboardSideMenu";
+import { SideMenuForAdmin, SideMenuForTrainee, SideMenuForTrainer } from "@/components/ui/DashboardSideMenu/DashboardSideMenu";
 import MyDrawer from "@/components/ui/MyDrawer/MyDrawer";
 import ProtectedRoute from "@/components/ui/ProtectedRoute/ProtectedRoute";
+import { useUserDataQuery } from "@/redux/features/auth/authApi";
 import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
 import { Button, Layout, theme } from "antd";
 import React, { useState } from "react";
@@ -18,13 +19,15 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
+  const { data: getMe } = useUserDataQuery(undefined);
+  console.log(getMe?.data?.role);
   return (
     <Layout className="h-screen">
       <Sider className="hidden md:block h-screen" trigger={null} collapsible collapsed={collapsed}>
         <div className="demo-logo-vertical" />
-        <SideMenuForAdmin />
-        {/* <SideMenuForTrainer /> */}
-        {/* <SideMenuForTrainee /> */}
+        {
+          getMe?.data?.role === "admin" ? <SideMenuForAdmin /> : getMe?.data?.role === "trainer" ? <SideMenuForTrainer /> : <SideMenuForTrainee/>
+        }
       </Sider>
       <Layout>
         <Header style={{ padding: 0, background: colorBgContainer }}>
