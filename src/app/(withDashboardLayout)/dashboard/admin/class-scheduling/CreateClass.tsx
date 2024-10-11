@@ -1,9 +1,13 @@
 "use client";
+import { useAddClassMutation } from "@/redux/features/manageClasses/manageClassesApi";
+import { useGetAllTrainersQuery } from "@/redux/features/manageTrainer/manageTrainerApi";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, DatePicker, Input, Select, SelectItem, Textarea } from "@nextui-org/react";
 import { TimePicker } from "antd";
 import moment from "moment";
-import { useForm } from "react-hook-form";
+import { useEffect } from "react";
+import { FieldValues, useForm } from "react-hook-form";
+import Swal from "sweetalert2";
 import { z } from "zod";
 
 // Zod schema for extreme validation
@@ -22,34 +26,89 @@ const formSchema = z.object({
 // Type inference for form values from the schema
 type FormData = z.infer<typeof formSchema>;
 
-export const animals = [
-  { key: "cat", label: "Cat" },
-  { key: "dog", label: "Dog" },
-  { key: "elephant", label: "Elephant" },
-  { key: "lion", label: "Lion" },
-  { key: "tiger", label: "Tiger" },
-  { key: "giraffe", label: "Giraffe" },
-  { key: "dolphin", label: "Dolphin" },
-  { key: "penguin", label: "Penguin" },
-  { key: "zebra", label: "Zebra" },
-  { key: "shark", label: "Shark" },
-  { key: "whale", label: "Whale" },
-  { key: "otter", label: "Otter" },
-  { key: "crocodile", label: "Crocodile" },
-];
+type TTrainer = {
+  _id: string;
+  name: {
+    firstName: string;
+    lastName: string;
+  };
+  email: string;
+  passwordChangedAt: string;
+  avatar: string;
+  role: 'trainer' | 'trainee' | 'admin'; // Assuming role has specific options
+  status: 'in-progress' | 'completed' | 'inactive'; // Assuming status has specific options
+  classSchedules: Array<string>; // You can refine this if you know the structure of classSchedules
+  isDeleted: boolean;
+  classCount: number;
+  createdAt: string;
+  updatedAt: string;
+  fullName: string;
+  id: string;
+};
 
-const CreateClass = () => {
+type TItem = {
+  key: string;
+  label: string;
+};
+
+const CreateClass = ({ setIsModalOpen }: { setIsModalOpen: (isOpen: boolean) => void }) => {
+  const [addClassMutation, { isError, error }] = useAddClassMutation();
+  const { data: trainersData } = useGetAllTrainersQuery(undefined);
+  const formattedData = trainersData?.data?.map((item: TTrainer )=> ({
+    key: item._id, // Use "id" as the key
+    label: item.fullName // Use "fullName" as the label
+  }));
+
+  useEffect(() => {
+    if (isError) {
+      Swal.fire({
+        position: "top-end",
+        icon: "error",
+        title: "There was a problem adding the Class.",
+        // text: error?.data?.success === false && error?.data?.errorSources[0]?.message,
+        showConfirmButton: true,
+      });
+    }
+  }, [isError, error]);
+
   const {
     register,
     handleSubmit,
     setValue,
+    reset,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
   });
 
-  const onSubmit = (data: FormData) => {
-    console.log("Form Data: ", data);
+  const onSubmit = async (formData: FieldValues) => {
+ 
+    formData.startTime = moment(formData.startTime).format("HH:mm");
+    try {
+      const res = await addClassMutation(formData).unwrap();
+      if (res.success) {
+        setIsModalOpen(false); // Close the modal on success
+        Swal.fire({
+          position: "top-end",
+          icon: "success",
+          title: "Class Added Successfully",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+        reset(); // Reset the form after submission
+      } else {
+        console.log("Login Failed:", res.error);
+      }
+    } catch (error) {
+      console.log(error);
+      // Swal.fire({
+      //   position: "top-end",
+      //   icon: "error",
+      //   title: "Error!",
+      //   text: "There was a problem adding the Class.",
+      //   showConfirmButton: true,
+      // });
+    }
   };
 
   return (
@@ -71,8 +130,8 @@ const CreateClass = () => {
         <div>
           <p className="">Select Trainer</p>
           <Select variant={"underlined"} placeholder="Select trainer" {...register("trainer")}>
-            {animals.map((animal) => (
-              <SelectItem key={animal.key}>{animal.label}</SelectItem>
+            {formattedData?.map((item: TItem ) => (
+              <SelectItem key={item.key}>{item.label}</SelectItem>
             ))}
           </Select>
 

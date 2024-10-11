@@ -1,18 +1,18 @@
 "use client";
 import { SideMenuForAdmin } from "@/components/ui/DashboardSideMenu/DashboardSideMenu";
 import MyDrawer from "@/components/ui/MyDrawer/MyDrawer";
-import { ContextProvider } from "@/lib/providers/MyContextProvider";
+import ProtectedRoute from "@/components/ui/ProtectedRoute/ProtectedRoute";
 import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
 import { Button, Layout, theme } from "antd";
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 
 const { Header, Sider, Content } = Layout;
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
-  const context = useContext(ContextProvider);
+//   const context = useContext(ContextProvider);
 
-  const windowWidth = context ? context.windowWidth : undefined;
-console.log(windowWidth);
+//   const windowWidth = context ? context.windowWidth : undefined;
+// console.log(windowWidth);
   const [collapsed, setCollapsed] = useState(false);
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -56,7 +56,10 @@ console.log(windowWidth);
             borderRadius: borderRadiusLG,
           }}
         >
+          <ProtectedRoute>
+
           {children}
+          </ProtectedRoute>
         </Content>
       </Layout>
     </Layout>

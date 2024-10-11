@@ -4,12 +4,90 @@ import { FlipWords } from "@/components/ui/flip-words";
 import { LinkPreview } from "@/components/ui/link-preview";
 import MyFormInputAceternity from "@/components/ui/MyForm/MyFormInputAceternity/MyFormInputAceternity";
 import MyFormWrapper from "@/components/ui/MyForm/MyFormWrapper/MyFormWrapper";
+import { useLoginMutation, useRegisterMutation } from "@/redux/features/auth/authApi";
+import { addTokenToLocalStorage } from "@/utils/tokenHandler";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { FieldValues } from "react-hook-form";
+import Swal from "sweetalert2";
+import { z } from "zod";
+
+// Define Zod validation schema for registration form
+export const registerSchema = z.object({
+  firstName: z
+    .string({ message: "First name is required" })
+    .min(1, "First name is required")
+    .max(50, "First name must be less than 50 characters"),
+  lastName: z
+    .string({ message: "Last name is required" })
+    .min(1, "Last name is required")
+    .max(50, "Last name must be less than 50 characters"),
+  email: z.string({ message: "Email is required" }).email("Invalid email address"),
+  password: z
+    .string({ message: "Password is required" })
+    .min(6, "Password must be at least 6 characters long"),
+  c_password: z
+    .string({ message: "Confirm password is required" })
+    .min(6, "Confirm password must be at least 6 characters long"),
+}).superRefine((data, ctx) => {
+  if (data.password !== data.c_password) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Passwords must match",
+      path: ["c_password"], // This is where the error will show up
+    });
+  }
+});
+
 
 export function RegisterWithEmail() {
-  const handleSubmit = (data: FieldValues, reset: () => void) => {
-    console.log("Form Data:", data);
-    reset(); // Uncomment this line to reset the form after submission
+  const [register, { isError: isRegistrationError, error: registrationError }] = useRegisterMutation();
+  const [login] = useLoginMutation();
+  useEffect(() => {
+    if (isRegistrationError) {
+      Swal.fire({
+        position: "top-end",
+        icon: "error",
+        title: "Registration Failed",
+        // text: registrationError?.data?.success == false && registrationError?.data?.errorSources[0]?.message,
+        showConfirmButton: true,
+        // timer: 1500,
+      });
+    }
+  }, [isRegistrationError, registrationError]);
+
+
+  const router = useRouter();
+
+  const handleSubmit = async (formData: FieldValues, reset: () => void) => {
+    const formattedData = {
+      name: {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+      },
+      email: formData.email,
+      password: formData.password,
+    };
+    const res = await register(formattedData).unwrap();
+    if (res.success) {
+      const loginData = await login({
+        email: formData.email,
+        password: formData.password,
+      }).unwrap();
+
+      addTokenToLocalStorage(loginData?.data?.accessToken);
+      Swal.fire({
+        position: "top-end",
+        icon: "success",
+        title: res?.message,
+        showConfirmButton: false,
+        timer: 1500,
+      });
+      router.push("/");
+      reset(); // Uncomment this line to reset the form after submission
+    } else {
+      alert("Registration Failed:");
+    }
   };
 
   return (
@@ -23,11 +101,11 @@ export function RegisterWithEmail() {
           Are you{" "}
           <FlipWords duration={1800} className="text-[#00a76b] dark:text-[#00a76b]" words={["sharp", "witty", "literate", "smart", "brilliant"]} /> ?{" "}
           <br />
-          Then register now!
+        <div className="text-3xl">  Then register as <span className="text-red-400">Trainee!</span></div>
         </div>
       </div>
 
-      <MyFormWrapper onSubmit={handleSubmit} className="flex flex-col gap-3 my-8">
+      <MyFormWrapper onSubmit={handleSubmit} validationSchema={registerSchema} className="flex flex-col gap-3 my-8">
         <div className="flex flex-col gap-4 md:gap-0 md:flex-row space-y-2 md:space-y-0 md:space-x-2 mb-3">
           <MyFormInputAceternity name="firstName" label="First name" placeholder="Your First name" />
           <MyFormInputAceternity name="lastName" label="Last name" placeholder="Your Last name" />
@@ -83,7 +161,6 @@ export function RegisterWithEmail() {
         >
           Login
         </LinkPreview>
-      
       </div>
     </div>
   );
@@ -97,5 +174,3 @@ const BottomGradient = () => {
     </>
   );
 };
-
-

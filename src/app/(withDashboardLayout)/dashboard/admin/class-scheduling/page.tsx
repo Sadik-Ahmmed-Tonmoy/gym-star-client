@@ -3,6 +3,7 @@ import MyModal from "@/components/ui/MyModal/MyModal";
 
 import CreateClass from "./CreateClass";
 import ManageClass from "./ManageClass";
+import { useState } from "react";
 
 // interface Trainer {
 //   name: {
@@ -21,6 +22,7 @@ import ManageClass from "./ManageClass";
 //   endTime: string;
 // }
 const ClassSchedulingPage = () => {
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 //   const classes: ClassItem[] = [
 //     {
 //       _id: "6706f1c89f830585f85e8c9e",
@@ -104,9 +106,11 @@ const ClassSchedulingPage = () => {
           <div></div>
           <h4 className="text-[#474848] font-poppins text-2xl text-center font-medium">Manage Classes</h4>
           {/* <Button className="bg-blue-400 text-white">Add Trainer</Button> */}
-          <MyModal buttonText="Add Class" title="Add Class">
-            <CreateClass />
+          <MyModal    isOpen={isCreateModalOpen}
+            setModalOpen={(isOpen: boolean) => setIsCreateModalOpen(isOpen)} buttonText="Add Class" title="Add Class">
+            <CreateClass setIsModalOpen={(isOpen: boolean) => setIsCreateModalOpen(isOpen)}/>
           </MyModal>
+        
         </div>
 
         <div>

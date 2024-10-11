@@ -1,10 +1,13 @@
 "use client";
+import { useAddTrainerMutation } from "@/redux/features/manageTrainer/manageTrainerApi";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button, Input } from "@nextui-org/react";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
+import { FieldValues, useForm } from "react-hook-form";
 import { IoEyeOff, IoEyeSharp } from "react-icons/io5";
+import Swal from "sweetalert2";
 import { z } from "zod";
+
 // Zod schema for extreme validation
 const formSchema = z.object({
   firstName: z.string().min(2, { message: "First Name must be at least 2 characters long" }),
@@ -21,21 +24,71 @@ const formSchema = z.object({
 // Type inference for form values from the schema
 type FormData = z.infer<typeof formSchema>;
 
-const CreateTrainer = () => {
+const CreateTrainer = ({ setIsModalOpen }: { setIsModalOpen: (isOpen: boolean) => void }) => {
+  const [addTrainerMutation, { isError, error }] = useAddTrainerMutation();
+
+  useEffect(() => {
+    if (isError) {
+      Swal.fire({
+        position: "top-end",
+        icon: "error",
+        title: "",
+        // text: error?.data?.success === false && error?.data?.errorSources[0]?.message,
+        showConfirmButton: true,
+      });
+    }
+  }, [isError, error]);
+
   const {
     register,
     handleSubmit,
     formState: { errors },
+reset,
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
   });
 
-  const onSubmit = (data: FormData) => {
-    console.log("Form Data: ", data);
+  const onSubmit = async (formData: FieldValues) => {
+    const formattedData = {
+      name: {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+      },
+      email: formData.email,
+      password: formData.password,
+    };
+
+    try {
+      const res = await addTrainerMutation(formattedData).unwrap();
+      if (res.success) {
+        setIsModalOpen(false); // Close the modal on success
+        Swal.fire({
+          position: "top-end",
+          icon: "success",
+          title: "Trainer Added Successfully",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+        reset(); // Reset the form after submission
+      } else {
+        console.log("Login Failed:", res.error);
+      }
+    } catch (error) {
+      console.error("Error adding trainer:", error);
+      Swal.fire({
+        position: "top-end",
+        icon: "error",
+        title: "Error!",
+        text: "There was a problem adding the trainer.",
+        showConfirmButton: true,
+      });
+    }
   };
+
   const [isVisible, setIsVisible] = useState(false);
 
   const toggleVisibility = () => setIsVisible(!isVisible);
+
   return (
     <div>
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3 my-5">
@@ -43,7 +96,6 @@ const CreateTrainer = () => {
           <Input
             type="text"
             variant={"underlined"}
-            key={"outside"}
             label="First Name"
             labelPlacement="outside"
             {...register("firstName")}
@@ -56,7 +108,6 @@ const CreateTrainer = () => {
           <Input
             type="text"
             variant={"underlined"}
-            key={"outside"}
             label="Last Name"
             labelPlacement="outside"
             {...register("lastName")}
@@ -69,7 +120,6 @@ const CreateTrainer = () => {
           <Input
             type="text"
             variant={"underlined"}
-            key={"outside"}
             label="Email"
             labelPlacement="outside"
             {...register("email")}
@@ -81,7 +131,6 @@ const CreateTrainer = () => {
         <div>
           <Input
             variant={"underlined"}
-            key={"outside"}
             label="Password"
             labelPlacement="outside"
             {...register("password")}

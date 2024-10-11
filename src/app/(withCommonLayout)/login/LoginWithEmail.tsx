@@ -1,19 +1,67 @@
 "use client";
-import React from "react";
 import { FlipWords } from "@/components/ui/flip-words";
 import { LinkPreview } from "@/components/ui/link-preview";
-import MyFormCheckBox from "@/components/ui/MyForm/MyFormCheckBox/MyFormCheckBox";
 import MyFormInputAceternity from "@/components/ui/MyForm/MyFormInputAceternity/MyFormInputAceternity";
 import MyFormWrapper from "@/components/ui/MyForm/MyFormWrapper/MyFormWrapper";
-import Link from "next/link";
+import { useAppDispatch } from "@/lib/hooks";
+import { useLoginMutation } from "@/redux/features/auth/authApi";
+import { setUser } from "@/redux/features/auth/authSlice";
+import { addTokenToLocalStorage } from "@/utils/tokenHandler";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { FieldValues } from "react-hook-form";
+import Swal from "sweetalert2";
+import { z } from "zod";
+
+
+// Define the Zod schema for form validation
+const loginSchema = z.object({
+  email: z.string().email("Invalid email address").nonempty("Email is required"),
+  password: z.string().min(6, "Password must be at least 6 characters long"),
+});
+
 
 export function LoginWithEmail() {
-  const [checked, setChecked] = React.useState(false);
-  console.log(checked);
-  const handleSubmit = (data: FieldValues, reset: () => void) => {
-    console.log("Form Data:", data);
-    reset(); // Uncomment this line to reset the form after submission
+
+
+  const [login, {isError, error}] = useLoginMutation();
+  const dispatch = useAppDispatch();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isError) {
+      Swal.fire({
+        position: "top-end",
+        icon: "error",
+        title: "Login Failed",
+        // text: error?.data?.success == false && error?.data?.errorSources[0]?.message,
+        showConfirmButton: true,
+        // timer: 1500,
+      });
+    }
+  }, [isError, error]);
+
+
+
+  const handleSubmit = async (formData: FieldValues, reset: () => void) => {
+    const res = await login(formData).unwrap();
+    if (res.success) {
+      console.log("Login Successful:", res.data);
+      addTokenToLocalStorage(res?.data?.accessToken);
+      dispatch(setUser({ user: res.data.user, token: res.data.accessToken }));
+      Swal.fire({
+        position: "top-end",
+        icon: "success",
+        title: "Login Successful",
+        showConfirmButton: false,
+        timer: 1500
+      });
+      router.push("/");
+      reset(); // Uncomment this line to reset the form after submission
+    }
+    else{
+      console.log("Login Failed:", res.error);
+    }
   };
 
   return (
@@ -31,19 +79,19 @@ export function LoginWithEmail() {
         </div>
       </div>
 
-      <MyFormWrapper onSubmit={handleSubmit} className="flex flex-col gap-3 my-8">
+      <MyFormWrapper onSubmit={handleSubmit} validationSchema={loginSchema} className="flex flex-col gap-3 my-8"  >
         <div className="flex flex-col gap-6 mb-4">
           <MyFormInputAceternity name="email" label="Email Address" placeholder="Enter Your Email Address" />
           <MyFormInputAceternity name="password" label="Password" placeholder="Enter Your Password" type="password" />
         </div>
 
-        <div className="flex justify-between items-center mb-6">
+        {/* <div className="flex justify-between items-center mb-6">
           <MyFormCheckBox title="Remember Me" handleCheckboxChange={setChecked} />
 
           <Link href={"/forgot-password"}>
             <p className="text-black-80 font-inter text-[14px] font-normal leading-normal tracking-[-0.14px]">Forgot Password?</p>
           </Link>
-        </div>
+        </div> */}
 
         <button
           className="bg-gradient-to-br relative group/btn from-[#00a76b] dark:from-zinc-900 dark:to-zinc-900 to-[#187c57] block dark:bg-zinc-800 w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]"
@@ -77,7 +125,6 @@ export function LoginWithEmail() {
 
       <div className="mb-2 lg:mb-10 text-center text-neutral-600  dark:text-neutral-300 text-opacity-75 font-inter text-[14px] font-normal leading-normal">
         Don&apos; have an account?
-  
         <LinkPreview
           url="/register"
           imageSrc="https://i0.wp.com/goldsgym.in/wp-content/uploads/2023/12/compress-strong-man-training-gym-min-scaled.jpg?fit=2560%2C1707&ssl=1"
@@ -99,4 +146,3 @@ const BottomGradient = () => {
     </>
   );
 };
-
