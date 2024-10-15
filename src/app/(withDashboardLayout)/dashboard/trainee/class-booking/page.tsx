@@ -1,43 +1,76 @@
 "use client";
 
+import { useUserDataQuery } from "@/redux/features/auth/authApi";
+import { useGetAllClassesQuery } from "@/redux/features/manageClasses/manageClassesApi";
+import { useEnrollToClassMutation, useRemoveTraineeFromClassMutation } from "@/redux/features/manageTrainee/manageTraineeApi";
+import { TClass } from "@/types";
 import { Button } from "antd";
 import moment from "moment";
+import Swal from "sweetalert2";
 
 const ClassBookingPage = () => {
-  const classes = [
-    {
-      _id: "6706f1c89f830585f85e8c9e",
-      className: "Evening Yoga",
-      trainer: {
-        name: {
-          firstName: "Emily",
-          lastName: "Smith",
-        },
-        email: "emily@example.com",
-        fullName: "trainer Doe",
-      },
-      date: "2024-10-18T00:00:00.000Z",
-      startTime: "07:29",
-      endTime: "09:29",
-      enrolledTrainees: [],
-    },
-    {
-      _id: "6706f1c89f830585f85e8c9f",
-      className: "Morning Cardio",
-      trainer: {
-        name: {
-          firstName: "John",
-          lastName: "Doe",
-        },
-        email: "asdas",
-        fullName: "trainer Doe",
-      },
-      date: "2024-10-19T00:00:00.000Z",
-      startTime: "06:00",
-      endTime: "08:00",
-      enrolledTrainees: [],
-    },
-  ];
+  const [enrollToClassMutation] = useEnrollToClassMutation();
+  const [removeTraineeFromClassMutation] = useRemoveTraineeFromClassMutation();
+  const { data: getMe } = useUserDataQuery(undefined);
+  const { data: getAllClassesQuery, isLoading } = useGetAllClassesQuery(undefined);
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  const handleBookClass = async (classId: string) => {
+    const data = {
+      id: classId,
+      traineeId: getMe?.data?._id,
+    };
+    const response = await enrollToClassMutation(data).unwrap();
+    console.log(response);
+    if (response.success) {
+      Swal.fire({
+        position: "top-end",
+        icon: "success",
+        title: "Class Booked Successfully",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+    }
+  };
+
+  const handleCancelClass = async (id: string) => {
+    Swal.fire({
+      title: "Are you sure?",
+      // text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const data = {
+            id,
+            traineeId: getMe?.data?._id,
+          }
+          const response = await removeTraineeFromClassMutation(data).unwrap(); // Await mutation resolution
+
+          if (response) {
+            Swal.fire({
+              title: "Deleted!",
+              text: "Class has been canceled.",
+              icon: "success",
+            });
+          }
+        } catch (error) {
+          console.error("Error deleting class:", error);
+          Swal.fire({
+            title: "Error!",
+            text: "There was a problem deleting the class.",
+            icon: "error",
+          });
+        }
+      }
+    });
+  };
 
   return (
     <>
@@ -57,7 +90,7 @@ const ClassBookingPage = () => {
             <p className="text-black font-poppins text-lg font-semibold flex-1">Action</p>
           </div>
           <div className="p-4 flex flex-col gap-5">
-            {classes?.map((classDetails) => (
+            {getAllClassesQuery?.data?.result?.map((classDetails: TClass) => (
               <div key={classDetails?._id} className="flex flex-col sm:flex-row gap-y-3 text-center  justify-between items-center">
                 <p className="text-[#474848] font-poppins text-lg font-semibold flex-1">{classDetails?.className}</p>
                 <p className="text-[var(--Natural-Color-2,#8F8F8F)] font-poppins text-lg font-light flex-1">{classDetails?.trainer?.fullName}</p>
@@ -74,12 +107,15 @@ const ClassBookingPage = () => {
                   {10 - classDetails?.enrolledTrainees?.length}
                 </p>
                 <div className="flex-1 flex items-center justify-center gap-3">
-                  <Button size="small" className="bg-[#21A36633] text-[#08A718]">
-                    Book
-                  </Button>
-                  <Button size="small" className="bg-[#EA5A4733] text-[#EA5A47]">
-                    Cancel
-                  </Button>
+                  {classDetails?.enrolledTrainees?.includes(getMe?.data?._id) ? (
+                    <Button onClick={() => handleCancelClass(classDetails?._id)} size="small" className="bg-[#EA5A4733] text-[#EA5A47]">
+                      Cancel
+                    </Button>
+                  ) : (
+                    <Button onClick={() => handleBookClass(classDetails?._id)} size="small" className="bg-[#21A36633] text-[#08A718]">
+                      Book
+                    </Button>
+                  )}
                 </div>
               </div>
             ))}
@@ -89,7 +125,7 @@ const ClassBookingPage = () => {
         {/* for mobile version start */}
 
         <div className="block xl:hidden">
-          {classes?.map((classDetails, index) => (
+          {getAllClassesQuery?.data?.result?.map((classDetails: TClass, index: number) => (
             <div key={classDetails?._id} className="flex flex-col gap-3 my-2 px-3 pb-5 border-b-2 ">
               <p className="text-xl font-bold">Class no: {index + 1}</p>
               <div>
@@ -117,12 +153,15 @@ const ClassBookingPage = () => {
                 <p className="text-[#474848] font-poppins text-lg font-semibold">{10 - classDetails?.enrolledTrainees?.length}</p>
               </div>
               <div className="flex items-center justify-center gap-3">
-                <Button size="small" className="bg-[#21A36633] text-[#08A718]">
-                  Book
-                </Button>
-                <Button size="small" className="bg-[#EA5A4733] text-[#EA5A47]">
-                  Cancel
-                </Button>
+              {classDetails?.enrolledTrainees?.includes(getMe?.data?._id) ? (
+                    <Button onClick={() => handleCancelClass(classDetails?._id)} size="small" className="bg-[#EA5A4733] text-[#EA5A47]">
+                      Cancel
+                    </Button>
+                  ) : (
+                    <Button onClick={() => handleBookClass(classDetails?._id)} size="small" className="bg-[#21A36633] text-[#08A718]">
+                      Book
+                    </Button>
+                  )}
               </div>
             </div>
           ))}

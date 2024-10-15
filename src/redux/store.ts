@@ -3,27 +3,19 @@ import {
   FLUSH,
   PAUSE,
   PERSIST,
-  persistReducer,
   PURGE,
   REGISTER,
   REHYDRATE
 } from 'redux-persist';
-import storage from 'redux-persist/lib/storage';
+
 import { baseApi } from './api/baseApi';
-import authReducer from './features/auth/authSlice';
 
-const userPersistConfig = {
-  key: 'auth',
-  storage,
-};
 
-const persistedUserReducer = persistReducer(userPersistConfig, authReducer);
 
 export const makeStore = () => {
   return configureStore({
     reducer: {
       [baseApi.reducerPath]: baseApi.reducer,
-      auth: persistedUserReducer,
   },
     middleware: (getDefaultMiddlewares) =>
       getDefaultMiddlewares({

@@ -1,25 +1,13 @@
+'use client';
+import { useUserDataQuery } from "@/redux/features/auth/authApi";
 import { Divider } from "antd";
+import Link from "next/link";
 import React from "react";
 import { TbEdit } from "react-icons/tb";
-// import { Link } from "react-router-dom";
-// import useAuthUser from "../../../hooks/useAuthUser";
-// import { Bars } from "react-loader-spinner";
 
 const MyProfile = () => {
-    // const { userData, isUserLoading } = useAuthUser();
-    // if(isUserLoading){
-    //     return   <div className="flex justify-center items-center min-h-[calc(100vh-55vh)]">
-    //     <Bars
-    //         height="40"
-    //         width="80"
-    //         color="#5DC9F4"
-    //         ariaLabel="bars-loading"
-    //         wrapperStyle={{}}
-    //         wrapperClass=""
-    //         visible={true}
-    //     />
-    // </div>
-    // }
+    const { data: getMe } = useUserDataQuery(undefined);
+
 
     return (
         <>
@@ -30,25 +18,26 @@ const MyProfile = () => {
                 <div className="pt-3 px-3 md:mb-3 md:pt-6 md:px-8">
                     <div className="flex justify-between mb-3 md:mb-6">
                         <p className="text-black font-inter text-base md:text-[18px] font-medium leading-normal">Personal Details</p>
-                  
+                  <Link href={'/dashboard/trainee/profile/update-profile'}>
                             <span className="flex gap-[6px] items-center text-black text-opacity-80 font-inter text-[14px] font-medium leading-normal">
                                 <TbEdit />
                                 Edit
                             </span>
+                  </Link>
                         
                     </div>
                     <div className="mb-3 md:mb-6">
                         <p className="mb-1 md:mb-2 text-black text-opacity-65 font-inter text-xs md:text-[14px] font-medium leading-normal">
                             Full Name
                         </p>
-                        <p className="text-black font-inter text-xs md:text-base font-semibold leading-normal tracking-[-0.16px]">Sadik</p>
+                        <p className="text-black font-inter text-xs md:text-base font-semibold leading-normal tracking-[-0.16px]">{getMe?.data?.fullName}</p>
                     </div>
                     <div className="mb-3 md:mb-6">
                         <p className="mb-1 md:mb-2 text-black text-opacity-65 font-inter text-xs md:text-[14px] font-medium leading-normal">
                             Email Address
                         </p>
                         <p className="text-black font-inter text-xs md:text-base font-semibold leading-normal tracking-[-0.16px]">
-                       email@gmail.com
+                     {getMe?.data?.email}
                         </p>
                     </div>
                   
@@ -57,9 +46,7 @@ const MyProfile = () => {
                         <div className="flex justify-between mb-2">
                             <p className="text-black font-inter text-xs md:text-base md:text-[18px] font-medium leading-normal">Password</p>
                         
-                            <span className=" text-black text-opacity-80 font-inter text-xs md:text-[14px] font-medium leading-normal">
-                                Change Password
-                            </span>
+                       
                            
                         </div>
                         <p className="text-black font-inter text-xs md:text-base font-semibold leading-normal tracking-[-0.16px]">***********</p>

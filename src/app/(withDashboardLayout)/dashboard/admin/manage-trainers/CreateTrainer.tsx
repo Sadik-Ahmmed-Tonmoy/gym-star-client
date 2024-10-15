@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useAddTrainerMutation } from "@/redux/features/manageTrainer/manageTrainerApi";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -32,8 +33,8 @@ const CreateTrainer = ({ setIsModalOpen }: { setIsModalOpen: (isOpen: boolean) =
       Swal.fire({
         position: "top-end",
         icon: "error",
-        title: "",
-        // text: error?.data?.success === false && error?.data?.errorSources[0]?.message,
+        // title: "",
+        text: (error as any)?.data?.success === false && (error as any)?.data?.errorSources[0]?.message,
         showConfirmButton: true,
       });
     }

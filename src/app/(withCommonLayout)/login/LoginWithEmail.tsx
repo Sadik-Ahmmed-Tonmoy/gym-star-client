@@ -1,18 +1,17 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { FlipWords } from "@/components/ui/flip-words";
 import { LinkPreview } from "@/components/ui/link-preview";
 import MyFormInputAceternity from "@/components/ui/MyForm/MyFormInputAceternity/MyFormInputAceternity";
 import MyFormWrapper from "@/components/ui/MyForm/MyFormWrapper/MyFormWrapper";
-import { useAppDispatch } from "@/lib/hooks";
-import { useLoginMutation } from "@/redux/features/auth/authApi";
-import { setUser } from "@/redux/features/auth/authSlice";
+import { useLoginMutation, useUserDataQuery } from "@/redux/features/auth/authApi";
 import { addTokenToLocalStorage } from "@/utils/tokenHandler";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { FieldValues } from "react-hook-form";
+import ReactLoading from 'react-loading';
 import Swal from "sweetalert2";
 import { z } from "zod";
-
 
 // Define the Zod schema for form validation
 const loginSchema = z.object({
@@ -20,12 +19,10 @@ const loginSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters long"),
 });
 
-
 export function LoginWithEmail() {
-
-
-  const [login, {isError, error}] = useLoginMutation();
-  const dispatch = useAppDispatch();
+  const { data, refetch } = useUserDataQuery(undefined);
+  console.log(data);
+  const [login, { isError, error, isLoading }] = useLoginMutation();
   const router = useRouter();
 
   useEffect(() => {
@@ -34,35 +31,62 @@ export function LoginWithEmail() {
         position: "top-end",
         icon: "error",
         title: "Login Failed",
-        // text: error?.data?.success == false && error?.data?.errorSources[0]?.message,
+        text: (error as any)?.data?.success === false && (error as any)?.data?.errorSources[0]?.message,
         showConfirmButton: true,
         // timer: 1500,
       });
     }
   }, [isError, error]);
 
-
-
   const handleSubmit = async (formData: FieldValues, reset: () => void) => {
-    const res = await login(formData).unwrap();
-    if (res.success) {
-      console.log("Login Successful:", res.data);
-      addTokenToLocalStorage(res?.data?.accessToken);
-      dispatch(setUser({ user: res.data.user, token: res.data.accessToken }));
-      Swal.fire({
-        position: "top-end",
-        icon: "success",
-        title: "Login Successful",
-        showConfirmButton: false,
-        timer: 1500
-      });
-      router.push("/");
-      reset(); // Uncomment this line to reset the form after submission
-    }
-    else{
-      console.log("Login Failed:", res.error);
+    try {
+      const res = await login(formData).unwrap();
+      if (res.success) {
+        console.log("Login Successful:", res.data);
+
+        // Save the token to localStorage
+        await addTokenToLocalStorage(res?.data?.accessToken);
+
+        // Show success message
+        Swal.fire({
+          position: "top-end",
+          icon: "success",
+          title: "Login Successful",
+          showConfirmButton: false,
+          timer: 2500,
+        });
+
+        // Set a flag in localStorage to indicate a successful login
+        localStorage.setItem("redirectAfterReload", "true");
+
+        // Refetch user data after successful login
+        await refetch();
+
+        // Reload the page to trigger the refetch with authorization header
+        setTimeout(() => {
+          window.location.reload();
+         }, 500);
+
+        reset(); // Reset the form after submission
+      } else {
+        console.log("Login Failed:", res.error);
+      }
+    } catch (e) {
+      console.error("Error during login:", e);
     }
   };
+
+  useEffect(() => {
+    // Check if the page was reloaded after a successful login
+    const redirectFlag = localStorage.getItem("redirectAfterReload");
+    if (redirectFlag) {
+      // Remove the flag from localStorage
+      localStorage.removeItem("redirectAfterReload");
+
+      // Redirect to home route
+      router.push("/");
+    }
+  }, [router]);
 
   return (
     <div
@@ -79,7 +103,7 @@ export function LoginWithEmail() {
         </div>
       </div>
 
-      <MyFormWrapper onSubmit={handleSubmit} validationSchema={loginSchema} className="flex flex-col gap-3 my-8"  >
+      <MyFormWrapper onSubmit={handleSubmit} validationSchema={loginSchema} className="flex flex-col gap-3 my-8">
         <div className="flex flex-col gap-6 mb-4">
           <MyFormInputAceternity name="email" label="Email Address" placeholder="Enter Your Email Address" />
           <MyFormInputAceternity name="password" label="Password" placeholder="Enter Your Password" type="password" />
@@ -93,13 +117,18 @@ export function LoginWithEmail() {
           </Link>
         </div> */}
 
-        <button
-          className="bg-gradient-to-br relative group/btn from-[#00a76b] dark:from-zinc-900 dark:to-zinc-900 to-[#187c57] block dark:bg-zinc-800 w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]"
-          type="submit"
-        >
-          Log in &rarr;
-          <BottomGradient />
-        </button>
+
+        {isLoading ? (
+          <div className="flex justify-center w-full"> <ReactLoading type={"balls"} color={"#00a76b"} height={50} width={100} /></div>
+        ) : (
+          <button
+            className="bg-gradient-to-br relative group/btn from-[#00a76b] dark:from-zinc-900 dark:to-zinc-900 to-[#187c57] block dark:bg-zinc-800 w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]"
+            type="submit"
+          >
+            Log in &rarr;
+            <BottomGradient />
+          </button>
+        )}
 
         <div className="bg-gradient-to-r from-transparent via-neutral-300 dark:via-neutral-700 to-transparent my-4 h-[1px] w-full" />
 

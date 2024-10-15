@@ -6,7 +6,7 @@ const baseQuery = fetchBaseQuery({
     credentials: 'include',
     // tagTypes: ["User"],
     prepareHeaders: (headers) => {
-        // const token = getState().auth.token;
+         // const token = getState().auth.token;
         const token = getTokenFromLocalStorage();
         headers.set("accept", "application/json");
         if (token) {

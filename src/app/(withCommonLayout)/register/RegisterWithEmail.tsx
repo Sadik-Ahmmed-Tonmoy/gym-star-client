@@ -83,12 +83,30 @@ export function RegisterWithEmail() {
         showConfirmButton: false,
         timer: 1500,
       });
-      router.push("/");
+      localStorage.setItem("redirectAfterReload", "true");
+
+      // Reload the page to trigger the refetch with authorization header
+   setTimeout(() => {
+    window.location.reload();
+   }, 500);
+    
       reset(); // Uncomment this line to reset the form after submission
     } else {
       alert("Registration Failed:");
     }
   };
+  
+  useEffect(() => {
+    // Check if the page was reloaded after a successful login
+    const redirectFlag = localStorage.getItem("redirectAfterReload");
+    if (redirectFlag) {
+      // Remove the flag from localStorage
+      localStorage.removeItem("redirectAfterReload");
+
+      // Redirect to home route
+      router.push("/");
+    }
+  }, [router]);
 
   return (
     <div

@@ -11,13 +11,17 @@ const authApi = baseApi.injectEndpoints({
                     body: userInfo,
                 }
             },
-            //   invalidatesTags: ["User"],
-            // onSuccess: (result, variables, api, {dispatch}) => {
-            //     const {user, token} = result;
-            //     // Dispatch setUser action to update authSlice with user and token
-            //     dispatch(setUser({user, token}));
-            //     // Show a success toast message
-            // },
+              invalidatesTags: ["User"]
+        }),
+        updateUser: builder.mutation({
+            query: (userInfo) => {
+                return {
+                    url: "user/me",
+                    method: "PATCH",
+                    body: userInfo,
+                }
+            },
+            invalidatesTags: ["User"],
         }),
         register: builder.mutation({
             query: (userInfo) => {
@@ -38,4 +42,4 @@ const authApi = baseApi.injectEndpoints({
     }),
 });
 
-export const {useLoginMutation, useRegisterMutation, useUserDataQuery} = authApi;
+export const {useLoginMutation, useRegisterMutation, useUpdateUserMutation, useUserDataQuery} = authApi;

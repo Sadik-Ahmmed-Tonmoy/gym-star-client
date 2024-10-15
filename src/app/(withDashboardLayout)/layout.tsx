@@ -10,24 +10,28 @@ import React, { useState } from "react";
 const { Header, Sider, Content } = Layout;
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
-//   const context = useContext(ContextProvider);
+  //   const context = useContext(ContextProvider);
 
-//   const windowWidth = context ? context.windowWidth : undefined;
-// console.log(windowWidth);
+  //   const windowWidth = context ? context.windowWidth : undefined;
+  // console.log(windowWidth);
   const [collapsed, setCollapsed] = useState(false);
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
 
   const { data: getMe } = useUserDataQuery(undefined);
-  console.log(getMe?.data?.role);
+
   return (
     <Layout className="h-screen">
       <Sider className="hidden md:block h-screen" trigger={null} collapsible collapsed={collapsed}>
         <div className="demo-logo-vertical" />
-        {
-          getMe?.data?.role === "admin" ? <SideMenuForAdmin /> : getMe?.data?.role === "trainer" ? <SideMenuForTrainer /> : <SideMenuForTrainee/>
-        }
+        {getMe?.data?.role === "admin" ? (
+          <SideMenuForAdmin />
+        ) : getMe?.data?.role === "trainer" ? (
+          <SideMenuForTrainer />
+        ) : getMe?.data?.role === "trainee" ? (
+          <SideMenuForTrainee />
+        ) : null}
       </Sider>
       <Layout>
         <Header style={{ padding: 0, background: colorBgContainer }}>
@@ -44,13 +48,18 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           />
           <MyDrawer title="Menu" className="block md:hidden ">
             <div className="h-full bg-[#001529] pt-5">
-
-          <SideMenuForAdmin />
+              {getMe?.data?.role === "admin" ? (
+                <SideMenuForAdmin />
+              ) : getMe?.data?.role === "trainer" ? (
+                <SideMenuForTrainer />
+              ) : getMe?.data?.role === "trainee" ? (
+                <SideMenuForTrainee />
+              ) : null}
             </div>
           </MyDrawer>
         </Header>
         <Content
-        className="overflow-x-hidden "
+          className="overflow-x-hidden "
           style={{
             margin: "24px 16px",
             // padding: 24,
@@ -59,10 +68,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             borderRadius: borderRadiusLG,
           }}
         >
-          <ProtectedRoute>
-
-          {children}
-          </ProtectedRoute>
+          <ProtectedRoute>{children}</ProtectedRoute>
         </Content>
       </Layout>
     </Layout>

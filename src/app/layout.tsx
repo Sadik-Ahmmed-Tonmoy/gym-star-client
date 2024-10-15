@@ -1,3 +1,4 @@
+import NavBar from "@/components/ui/NavBar";
 import MyContextProvider from "@/lib/providers/MyContextProvider";
 import { NextUiProvider } from "@/lib/providers/NextUIProvider";
 import ReduxStoreProvider from "@/lib/providers/ReduxStoreProvider";
@@ -5,11 +6,14 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 
+
+
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
   weight: "100 900",
 });
+
 const geistMono = localFont({
   src: "./fonts/GeistMonoVF.woff",
   variable: "--font-geist-mono",
@@ -33,7 +37,10 @@ export default function RootLayout({
         <ReduxStoreProvider>
           <NextUiProvider>
             <MyContextProvider>
-              <div className="dark:bg-[#121212]">{children}</div>
+              <div className="dark:bg-[#121212] relative ">
+                <NavBar />
+                {children}
+              </div>
             </MyContextProvider>
           </NextUiProvider>
         </ReduxStoreProvider>

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useAddClassMutation } from "@/redux/features/manageClasses/manageClassesApi";
 import { useGetAllTrainersQuery } from "@/redux/features/manageTrainer/manageTrainerApi";
@@ -64,8 +65,8 @@ const CreateClass = ({ setIsModalOpen }: { setIsModalOpen: (isOpen: boolean) => 
       Swal.fire({
         position: "top-end",
         icon: "error",
-        title: "There was a problem adding the Class.",
-        // text: error?.data?.success === false && error?.data?.errorSources[0]?.message,
+        // title: "There was a problem adding the Class.",
+        text: (error as any)?.data?.success === false && (error as any)?.data?.errorSources[0]?.message,
         showConfirmButton: true,
       });
     }
