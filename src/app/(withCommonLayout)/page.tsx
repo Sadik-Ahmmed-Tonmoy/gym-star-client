@@ -6,7 +6,7 @@ import StickyScroll from "../../components/ui/StickyScroll/StickyScroll";
 import HorizontalScroll from "@/components/ui/HorizontalScroll/HorizontalScroll";
 import Footer from "@/components/ui/Footer/Footer";
 import { RandomizedTextEffect } from "@/components/ui/text-randomized";
-import Card2 from "@/components/ui/ProductCardWithColorAndSize";
+
 
 const HomePage = () => {
   useEffect(() => {

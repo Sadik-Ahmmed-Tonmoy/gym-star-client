@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
-import React, { FormEvent, useLayoutEffect, useRef, useState } from 'react'
 import { motion, useInView } from 'framer-motion'
 import Link from 'next/link'
+import { useRef } from 'react'
 
 const alphabetsArr = ["A", "B", "C", "D", "E", "F", "G", "H"]
 
