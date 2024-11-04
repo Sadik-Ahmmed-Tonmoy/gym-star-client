@@ -1,13 +1,14 @@
-import { getTokenFromLocalStorage } from "@/utils/tokenHandler";
+
 import {createApi, fetchBaseQuery} from "@reduxjs/toolkit/query/react";
+import { RootState } from "../store";
 
 const baseQuery = fetchBaseQuery({
     baseUrl: "https://gym-star-server-with-ts-and-mongoose.vercel.app/api/v1/",
     credentials: 'include',
     // tagTypes: ["User"],
-    prepareHeaders: (headers) => {
-         // const token = getState().auth.token;
-        const token = getTokenFromLocalStorage();
+    prepareHeaders: (headers, {getState}) => {
+         const token = (getState() as RootState).auth.token;
+        // const token = getTokenFromLocalStorage();
         headers.set("accept", "application/json");
         if (token) {
             headers.set("authorization", `${token}`);
