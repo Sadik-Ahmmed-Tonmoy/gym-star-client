@@ -7,10 +7,13 @@ import React, { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import { FloatingNav } from "./floating-navbar";
 import { verifyToken } from "@/utils/verifyToken";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { logout, selectCurrentUser, useCurrentToken } from "@/redux/features/auth/authSlice";
 
 const NavBar = () => {
-  const { data: getMe, refetch, isLoading } = useUserDataQuery(undefined);
-
+  // const { data: getMe, refetch, isLoading } = useUserDataQuery(undefined);
+  const user = useAppSelector(selectCurrentUser)
+  console.log(user?.role);
   const router = useRouter();
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);  // Initial state
 
@@ -22,6 +25,8 @@ const NavBar = () => {
 
 
   const token = getTokenFromLocalStorage();
+  const tokenFromRedux = useAppSelector(useCurrentToken)
+  const dispatch = useAppDispatch();
 let userData = null;
 useEffect(() => {
   if (token) {
@@ -44,15 +49,16 @@ useEffect(() => {
       });
 
       if (result.isConfirmed) {
-        await removeTokenFromLocalStorage();
-        refetch();
+        // await removeTokenFromLocalStorage();
+        // refetch();
+        dispatch(logout())
         await Swal.fire({
           title: "Logged Out!",
           icon: "success",
           timer: 1500,
           showConfirmButton: false,
         });
-        setIsUserLoggedIn(false);
+        // setIsUserLoggedIn(false);
         await router.push("/");
       }
     } catch (error) {
@@ -64,11 +70,11 @@ useEffect(() => {
     {
       name: "Dashboard",
       link: (() => {
-        if (getMe?.data?.role === "admin") {
+        if (user?.role === "admin") {
           return "/dashboard/admin/manage-trainers";
-        } else if (getMe?.data?.role === "trainer") {
+        } else if (user?.role === "trainer") {
           return "/dashboard/trainer/view-classes";
-        } else if (getMe?.data?.role === "trainee") {
+        } else if (user?.role === "trainee") {
           return "/dashboard/trainee/profile";
         } else {
           return "/login";
@@ -84,17 +90,17 @@ useEffect(() => {
       </Link>
 
       {/* Conditional rendering based on user role */}
-      {getMe?.data?.role === "admin" && (
+      {user?.role === "admin" && (
         <Link href={"/dashboard/admin/manage-trainers"}>
           <p>Dashboard</p>
         </Link>
       )}
-      {getMe?.data?.role === "trainer" && (
+      {user?.role === "trainer" && (
         <Link href={"/dashboard/trainer/view-classes"}>
           <p>Dashboard</p>
         </Link>
       )}
-      {getMe?.data?.role === "trainee" && (
+      {user?.role === "trainee" && (
         <Link href={"/dashboard/trainee/profile"}>
           <p>Dashboard</p>
         </Link>
@@ -102,7 +108,7 @@ useEffect(() => {
 
       {/* Login/Logout Button based on isUserLoggedIn */}
       <div>
-        {isUserLoggedIn ? (
+        {tokenFromRedux ? (
           <div onClick={handleLogout} className="text-red-500 cursor-pointer">
             Log out
           </div>

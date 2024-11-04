@@ -12,7 +12,7 @@ import { verifyToken } from "@/utils/verifyToken";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { FieldValues } from "react-hook-form";
-import ReactLoading from 'react-loading';
+import ReactLoading from "react-loading";
 import Swal from "sweetalert2";
 import { z } from "zod";
 
@@ -23,9 +23,7 @@ const loginSchema = z.object({
 });
 
 export function LoginWithEmail() {
-  const dispatch = useAppDispatch()
-  const { data, refetch } = useUserDataQuery(undefined);
-
+  const dispatch = useAppDispatch();
   const [login, { isError, error, isLoading }] = useLoginMutation();
   const router = useRouter();
 
@@ -48,11 +46,9 @@ export function LoginWithEmail() {
       if (res.success) {
         console.log("Login Successful:", res.data);
 
-        const user = verifyToken(res?.data?.accessToken);
-   
-dispatch(setUser({user:user, token: res?.data?.accessToken}))
-        // Save the token to localStorage
-        await addTokenToLocalStorage(res?.data?.accessToken);
+        const user = await verifyToken(res?.data?.accessToken);
+
+        await dispatch(setUser({ user: user, token: res?.data?.accessToken }));
 
         // Show success message
         Swal.fire({
@@ -62,19 +58,7 @@ dispatch(setUser({user:user, token: res?.data?.accessToken}))
           showConfirmButton: false,
           timer: 2500,
         });
-
-        // Set a flag in localStorage to indicate a successful login
-        // localStorage.setItem("redirectAfterReload", "true");
-
-        // Refetch user data after successful login
-        await refetch();
-
-        // Reload the page to trigger the refetch with authorization header
-        // setTimeout(() => {
-        //   window.location.reload();
-        //  }, 500);
-
-        // reset(); // Reset the form after submission
+        router.push("/");
       } else {
         console.log("Login Failed:", res.error);
       }
@@ -82,18 +66,6 @@ dispatch(setUser({user:user, token: res?.data?.accessToken}))
       console.error("Error during login:", e);
     }
   };
-
-  useEffect(() => {
-    // Check if the page was reloaded after a successful login
-    const redirectFlag = localStorage.getItem("redirectAfterReload");
-    if (redirectFlag) {
-      // Remove the flag from localStorage
-      localStorage.removeItem("redirectAfterReload");
-
-      // Redirect to home route
-      router.push("/");
-    }
-  }, [router]);
 
   return (
     <div
@@ -124,9 +96,11 @@ dispatch(setUser({user:user, token: res?.data?.accessToken}))
           </Link>
         </div> */}
 
-
         {isLoading ? (
-          <div className="flex justify-center w-full"> <ReactLoading type={"balls"} color={"#00a76b"} height={50} width={100} /></div>
+          <div className="flex justify-center w-full">
+            {" "}
+            <ReactLoading type={"balls"} color={"#00a76b"} height={50} width={100} />
+          </div>
         ) : (
           <button
             className="bg-gradient-to-br relative group/btn from-[#00a76b] dark:from-zinc-900 dark:to-zinc-900 to-[#187c57] block dark:bg-zinc-800 w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset] dark:shadow-[0px_1px_0px_0px_var(--zinc-800)_inset,0px_-1px_0px_0px_var(--zinc-800)_inset]"
