@@ -4,8 +4,11 @@ import { FlipWords } from "@/components/ui/flip-words";
 import { LinkPreview } from "@/components/ui/link-preview";
 import MyFormInputAceternity from "@/components/ui/MyForm/MyFormInputAceternity/MyFormInputAceternity";
 import MyFormWrapper from "@/components/ui/MyForm/MyFormWrapper/MyFormWrapper";
+import { useAppDispatch } from "@/lib/hooks";
 import { useLoginMutation, useRegisterMutation } from "@/redux/features/auth/authApi";
+import { setUser } from "@/redux/features/auth/authSlice";
 import { addTokenToLocalStorage } from "@/utils/tokenHandler";
+import { verifyToken } from "@/utils/verifyToken";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { FieldValues } from "react-hook-form";
@@ -13,34 +16,26 @@ import Swal from "sweetalert2";
 import { z } from "zod";
 
 // Define Zod validation schema for registration form
-export const registerSchema = z.object({
-  firstName: z
-    .string({ message: "First name is required" })
-    .min(1, "First name is required")
-    .max(50, "First name must be less than 50 characters"),
-  lastName: z
-    .string({ message: "Last name is required" })
-    .min(1, "Last name is required")
-    .max(50, "Last name must be less than 50 characters"),
-  email: z.string({ message: "Email is required" }).email("Invalid email address"),
-  password: z
-    .string({ message: "Password is required" })
-    .min(6, "Password must be at least 6 characters long"),
-  c_password: z
-    .string({ message: "Confirm password is required" })
-    .min(6, "Confirm password must be at least 6 characters long"),
-}).superRefine((data, ctx) => {
-  if (data.password !== data.c_password) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: "Passwords must match",
-      path: ["c_password"], // This is where the error will show up
-    });
-  }
-});
-
+export const registerSchema = z
+  .object({
+    firstName: z.string({ message: "First name is required" }).min(1, "First name is required").max(50, "First name must be less than 50 characters"),
+    lastName: z.string({ message: "Last name is required" }).min(1, "Last name is required").max(50, "Last name must be less than 50 characters"),
+    email: z.string({ message: "Email is required" }).email("Invalid email address"),
+    password: z.string({ message: "Password is required" }).min(6, "Password must be at least 6 characters long"),
+    c_password: z.string({ message: "Confirm password is required" }).min(6, "Confirm password must be at least 6 characters long"),
+  })
+  .superRefine((data, ctx) => {
+    if (data.password !== data.c_password) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Passwords must match",
+        path: ["c_password"], // This is where the error will show up
+      });
+    }
+  });
 
 export function RegisterWithEmail() {
+  const dispatch = useAppDispatch();
   const [register, { isError: isRegistrationError, error: registrationError }] = useRegisterMutation();
   const [login] = useLoginMutation();
   useEffect(() => {
@@ -55,7 +50,6 @@ export function RegisterWithEmail() {
       });
     }
   }, [isRegistrationError, registrationError]);
-
 
   const router = useRouter();
 
@@ -75,7 +69,9 @@ export function RegisterWithEmail() {
         password: formData.password,
       }).unwrap();
 
-      addTokenToLocalStorage(loginData?.data?.accessToken);
+      const user = await verifyToken(loginData?.data?.accessToken);
+
+      await dispatch(setUser({ user: user, token: loginData?.data?.accessToken }));
       Swal.fire({
         position: "top-end",
         icon: "success",
@@ -83,30 +79,11 @@ export function RegisterWithEmail() {
         showConfirmButton: false,
         timer: 1500,
       });
-      // localStorage.setItem("redirectAfterReload", "true");
-
-      // Reload the page to trigger the refetch with authorization header
-  //  setTimeout(() => {
-  //   window.location.reload();
-  //  }, 500);
-    
-  //     reset(); // Uncomment this line to reset the form after submission
+      router.push("/");
     } else {
       alert("Registration Failed:");
     }
   };
-  
-  useEffect(() => {
-    // Check if the page was reloaded after a successful login
-    const redirectFlag = localStorage.getItem("redirectAfterReload");
-    if (redirectFlag) {
-      // Remove the flag from localStorage
-      localStorage.removeItem("redirectAfterReload");
-
-      // Redirect to home route
-      router.push("/");
-    }
-  }, [router]);
 
   return (
     <div
@@ -119,7 +96,10 @@ export function RegisterWithEmail() {
           Are you{" "}
           <FlipWords duration={1800} className="text-[#00a76b] dark:text-[#00a76b]" words={["sharp", "witty", "literate", "smart", "brilliant"]} /> ?{" "}
           <br />
-        <div className="text-3xl">  Then register as <span className="text-red-400">Trainee!</span></div>
+          <div className="text-3xl">
+            {" "}
+            Then register as <span className="text-red-400">Trainee!</span>
+          </div>
         </div>
       </div>
 
