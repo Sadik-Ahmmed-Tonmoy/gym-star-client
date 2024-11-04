@@ -5,7 +5,6 @@ import { RootState } from "../store";
 const baseQuery = fetchBaseQuery({
     baseUrl: "https://gym-star-server-with-ts-and-mongoose.vercel.app/api/v1/",
     credentials: 'include',
-    // tagTypes: ["User"],
     prepareHeaders: (headers, {getState}) => {
          const token = (getState() as RootState).auth.token;
         // const token = getTokenFromLocalStorage();
