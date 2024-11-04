@@ -4,8 +4,11 @@ import { FlipWords } from "@/components/ui/flip-words";
 import { LinkPreview } from "@/components/ui/link-preview";
 import MyFormInputAceternity from "@/components/ui/MyForm/MyFormInputAceternity/MyFormInputAceternity";
 import MyFormWrapper from "@/components/ui/MyForm/MyFormWrapper/MyFormWrapper";
+import { useAppDispatch } from "@/lib/hooks";
 import { useLoginMutation, useUserDataQuery } from "@/redux/features/auth/authApi";
+import { setUser } from "@/redux/features/auth/authSlice";
 import { addTokenToLocalStorage } from "@/utils/tokenHandler";
+import { verifyToken } from "@/utils/verifyToken";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { FieldValues } from "react-hook-form";
@@ -20,8 +23,9 @@ const loginSchema = z.object({
 });
 
 export function LoginWithEmail() {
+  const dispatch = useAppDispatch()
   const { data, refetch } = useUserDataQuery(undefined);
-  console.log(data);
+
   const [login, { isError, error, isLoading }] = useLoginMutation();
   const router = useRouter();
 
@@ -44,6 +48,9 @@ export function LoginWithEmail() {
       if (res.success) {
         console.log("Login Successful:", res.data);
 
+        const user = verifyToken(res?.data?.accessToken);
+   
+dispatch(setUser({user:user, token: res?.data?.accessToken}))
         // Save the token to localStorage
         await addTokenToLocalStorage(res?.data?.accessToken);
 
@@ -57,17 +64,17 @@ export function LoginWithEmail() {
         });
 
         // Set a flag in localStorage to indicate a successful login
-        localStorage.setItem("redirectAfterReload", "true");
+        // localStorage.setItem("redirectAfterReload", "true");
 
         // Refetch user data after successful login
         await refetch();
 
         // Reload the page to trigger the refetch with authorization header
-        setTimeout(() => {
-          window.location.reload();
-         }, 500);
+        // setTimeout(() => {
+        //   window.location.reload();
+        //  }, 500);
 
-        reset(); // Reset the form after submission
+        // reset(); // Reset the form after submission
       } else {
         console.log("Login Failed:", res.error);
       }

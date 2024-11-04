@@ -5,8 +5,8 @@ import ReduxStoreProvider from "@/lib/providers/ReduxStoreProvider";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-
-
+import { PersistGate } from "redux-persist/integration/react";
+import { persistor } from "@/redux/store";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",

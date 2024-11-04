@@ -26,6 +26,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       <Sider className="hidden md:block h-screen" trigger={null} collapsible collapsed={collapsed}>
         <div className="demo-logo-vertical" />
         {getMe?.data?.role === "admin" ? (
+          
+ 
           <SideMenuForAdmin />
         ) : getMe?.data?.role === "trainer" ? (
           <SideMenuForTrainer />
@@ -68,7 +70,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             borderRadius: borderRadiusLG,
           }}
         >
-          <ProtectedRoute>{children}</ProtectedRoute>
+         {children}
         </Content>
       </Layout>
     </Layout>

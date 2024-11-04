@@ -63,9 +63,7 @@ function Card2() {
               </>
             )}
           </motion.button>
-          {/* <button className="absolute top-2 right-2 z-20">
-            <Heart />
-          </button> */}
+   
           {CardArr.map((data, index) => (
             <Image
             key={index}

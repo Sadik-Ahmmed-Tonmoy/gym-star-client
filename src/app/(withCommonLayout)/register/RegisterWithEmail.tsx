@@ -83,14 +83,14 @@ export function RegisterWithEmail() {
         showConfirmButton: false,
         timer: 1500,
       });
-      localStorage.setItem("redirectAfterReload", "true");
+      // localStorage.setItem("redirectAfterReload", "true");
 
       // Reload the page to trigger the refetch with authorization header
-   setTimeout(() => {
-    window.location.reload();
-   }, 500);
+  //  setTimeout(() => {
+  //   window.location.reload();
+  //  }, 500);
     
-      reset(); // Uncomment this line to reset the form after submission
+  //     reset(); // Uncomment this line to reset the form after submission
     } else {
       alert("Registration Failed:");
     }
