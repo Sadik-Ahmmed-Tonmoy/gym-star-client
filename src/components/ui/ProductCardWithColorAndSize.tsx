@@ -1,16 +1,11 @@
 'use client'
-import React, { ReactNode, useState } from 'react'
-import Image from 'next/image'
-import {
-  CheckIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
-  Heart,
-  ShoppingCart,
-} from 'lucide-react'
-import * as Select from '@radix-ui/react-select'
-import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
+import {
+  Heart,
+  ShoppingCart
+} from 'lucide-react'
+import Image from 'next/image'
+import { useState } from 'react'
 
 
 export const CardArr = [
@@ -32,6 +27,7 @@ export const CardArr = [
 
 function Card2() {
   const [selectedImage, setSelectedImage] = useState(CardArr[0].img)
+  console.log(selectedImage);
   const [selectedColor, setSelectedColor] = useState(CardArr[0].color)
   const handleColorButtonClick = (img: string, color: string) => {
     setSelectedImage(img)
