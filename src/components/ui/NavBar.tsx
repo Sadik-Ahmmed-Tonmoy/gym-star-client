@@ -1,21 +1,19 @@
 "use client";
-import { useUserDataQuery } from "@/redux/features/auth/authApi";
-import { getTokenFromLocalStorage, removeTokenFromLocalStorage } from "@/utils/tokenHandler";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
-import Swal from "sweetalert2";
-import { FloatingNav } from "./floating-navbar";
-import { verifyToken } from "@/utils/verifyToken";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { logout, selectCurrentUser, useCurrentToken } from "@/redux/features/auth/authSlice";
+import { getTokenFromLocalStorage } from "@/utils/tokenHandler";
+import { verifyToken } from "@/utils/verifyToken";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import Swal from "sweetalert2";
+import { FloatingNav } from "./floating-navbar";
 
 const NavBar = () => {
   // const { data: getMe, refetch, isLoading } = useUserDataQuery(undefined);
   const user = useAppSelector(selectCurrentUser)
   console.log(user?.role);
   const router = useRouter();
-  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);  // Initial state
 
   // Update `isUserLoggedIn` based on token presence
   // useEffect(() => {
@@ -30,7 +28,7 @@ const NavBar = () => {
 let userData = null;
 useEffect(() => {
   if (token) {
-    setIsUserLoggedIn(true);
+  
     userData = verifyToken(token);
     console.log(userData);
   }

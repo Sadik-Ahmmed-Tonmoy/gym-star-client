@@ -7,7 +7,6 @@ import MyFormWrapper from "@/components/ui/MyForm/MyFormWrapper/MyFormWrapper";
 import { useAppDispatch } from "@/lib/hooks";
 import { useLoginMutation, useRegisterMutation } from "@/redux/features/auth/authApi";
 import { setUser } from "@/redux/features/auth/authSlice";
-import { addTokenToLocalStorage } from "@/utils/tokenHandler";
 import { verifyToken } from "@/utils/verifyToken";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -53,7 +52,7 @@ export function RegisterWithEmail() {
 
   const router = useRouter();
 
-  const handleSubmit = async (formData: FieldValues, reset: () => void) => {
+  const handleSubmit = async (formData: FieldValues) => {
     const formattedData = {
       name: {
         firstName: formData.firstName,

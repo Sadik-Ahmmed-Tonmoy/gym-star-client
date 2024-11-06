@@ -1,7 +1,6 @@
 "use client";
 import { SideMenuForAdmin, SideMenuForTrainee, SideMenuForTrainer } from "@/components/ui/DashboardSideMenu/DashboardSideMenu";
 import MyDrawer from "@/components/ui/MyDrawer/MyDrawer";
-import ProtectedRoute from "@/components/ui/ProtectedRoute/ProtectedRoute";
 import { useUserDataQuery } from "@/redux/features/auth/authApi";
 import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
 import { Button, Layout, theme } from "antd";

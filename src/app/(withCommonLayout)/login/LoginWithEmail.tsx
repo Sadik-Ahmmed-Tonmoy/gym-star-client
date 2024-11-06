@@ -39,7 +39,7 @@ export function LoginWithEmail() {
     }
   }, [isError, error]);
 
-  const handleSubmit = async (formData: FieldValues, reset: () => void) => {
+  const handleSubmit = async (formData: FieldValues) => {
     try {
       const res = await login(formData).unwrap();
       if (res.success) {

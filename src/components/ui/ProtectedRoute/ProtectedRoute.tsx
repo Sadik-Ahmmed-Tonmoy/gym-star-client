@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useAppSelector } from '@/lib/hooks';
 import { useCurrentToken } from '@/redux/features/auth/authSlice';
-import { getTokenFromLocalStorage, removeTokenFromLocalStorage } from '@/utils/tokenHandler';
+import { removeTokenFromLocalStorage } from '@/utils/tokenHandler';
 import { verifyToken } from '@/utils/verifyToken';
 import { useRouter } from 'next/navigation';
-import React, { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect } from 'react';
 import Swal from 'sweetalert2';
 
 type TProtectedRoute = {
