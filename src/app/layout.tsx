@@ -1,7 +1,7 @@
 import NavBar from "@/components/ui/NavBar";
 import MyContextProvider from "@/lib/providers/MyContextProvider";
 import { NextUiProvider } from "@/lib/providers/NextUIProvider";
-import ReduxStoreProvider from "@/lib/providers/ReduxStoreProvider";
+import ReduxStoreProvider from "@/redux/ReduxStoreProvider";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
