@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useAppSelector } from '@/lib/hooks';
+import { useAppSelector } from '@/redux/hooks';
 import { useCurrentToken } from '@/redux/features/auth/authSlice';
 import { removeTokenFromLocalStorage } from '@/utils/tokenHandler';
 import { verifyToken } from '@/utils/verifyToken';

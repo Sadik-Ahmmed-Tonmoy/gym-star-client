@@ -1,5 +1,5 @@
 "use client";
-import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { logout, selectCurrentUser, useCurrentToken } from "@/redux/features/auth/authSlice";
 import { getTokenFromLocalStorage } from "@/utils/tokenHandler";
 import { verifyToken } from "@/utils/verifyToken";
